@@ -73,6 +73,29 @@ class Deck:
             self.cards[i], self.cards[r] = self.cards[r], self.cards[i]
 
 
+class Hand:
+    poker_hands = ['Straight' ,'Flush', 'Full House', 'Four-of-a-kind', 'Straight Flush']
+
+    def __init__(self, hand, high_card):
+        self.hand = hand
+        self.high_card = high_card
+        # high number is a card object
+
+    def __lt__(self, other):
+        if Hand.poker_hands.index(self.hand) < Hand.poker_hands.index(other.hand):
+            if self.high_card < other.high_card:
+                return True
+
+    def __gt__(self, other):
+        if Hand.poker_hands.index(self.hand) > Hand.poker_hands.index(other.hand):
+            if self.high_card > other.high_card:
+                return True
+
+    def __repr__(self):
+        description = str(self.hand) + ', ' + str(self.high_card) + ' high'
+        return description
+
+
 class Player:
     def __init__(self, name):
         self.hand = {}
@@ -81,25 +104,41 @@ class Player:
     def play(self, cards):
         cards_played = [self.hand[card] for card in cards]
         card_numbers = [card.number for card in cards_played]
-        number_counter = 0
-        print(cards_played)
-        # print(sorted(cards_played, key = attrgetter('number')))
-        hand_order = ['Straight Flush', 'Four-of-a-kind', 'Full House', 'Flush', 'Straight']
+        fh_three = []
+        fh_two = []
+        for card in cards_played:
+            if card_numbers.count(card.number) == 3:
+                fh_three.append(card)
+            elif card_numbers.count(card.number) == 2:
+                fh_two.append(card)
 
         def is_in(lst1, lst2):
             for i in range(len(lst2)):
                 if lst1 == lst2[i: (i + len(lst1))]:
                     return True
 
-        if len(cards) == 5:
-            if is_in(sorted([card.number for card in cards_played], key= lambda card: Card.two_low_numbers.index(card)), Card.two_low_numbers) == True and sum(1 for card in cards_played if card.suit == cards_played[0].suit) == 5:
-                return [hand_order[0], cards_played[0].suit, sorted([card.number for card in cards_played], key= lambda card: Card.two_low_numbers.index(card))[-1]]
+        def what_is_it(cards):
+            print((cards))
+            if len(cards) == 5:
+                if is_in(sorted([card.number for card in cards_played], key= lambda card: Card.two_low_numbers.index(card)), Card.two_low_numbers) == True and sum(1 for card in cards_played if card.suit == cards_played[0].suit) == 5:
+                    return Hand(Hand.poker_hands[4], sorted(cards_played)[-1])
 
-            for card in card_numbers:
-                if card_numbers.count(card) == 4:
-                    return [hand_order[1], card]
+                for card in cards_played:
+                    if card_numbers.count(card.number) == 4:
+                       return Hand(Hand.poker_hands[3], card)
 
-            for card in card_numbers
+                if len(fh_three) == 3 and len(fh_two) == 2:
+                    return Hand(Hand.poker_hands[2], sorted(fh_three)[-1])
+                elif is_in(sorted([card.number for card in cards_played], key= lambda card: Card.two_low_numbers.index(card)), Card.two_low_numbers) == True:
+                    return Hand(Hand.poker_hands[1])
+                elif
+        what_is_it(cards_played)
+
+
+
+
+
+
 
 
 
@@ -131,10 +170,12 @@ new_deck = Deck()
 # new_deck.deal()
 card1 = Card('Hearts', 'Ace')
 card2 = Card('Spades', 'Ace')
-card3 = Card('Clubs', 'Ace')
-card4 = Card('Diamonds', 'Ace')
-card5 = Card('Hearts', 10)
+card3 = Card('Clubs', 'Queen')
+card4 = Card('Diamonds', 'Queen')
+card5 = Card('Hearts', 'Queen')
 new_deck.cards = [card1, card2, card3, card4, card5]
 player1.hand = {1: card2, 2: card5, 3: card1, 4: card3, 5: card4}
 
 print(player1.play([2, 5, 3, 1, 4]))
+
+
