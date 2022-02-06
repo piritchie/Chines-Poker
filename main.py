@@ -129,10 +129,14 @@ class Player:
 
                 if len(fh_three) == 3 and len(fh_two) == 2:
                     return Hand(Hand.poker_hands[2], sorted(fh_three)[-1])
+
+                elif sum(1 for card in cards_played if card.suit == cards_played[0].suit) == 5:
+                    return Hand(Hand.poker_hands[1], sorted([card.number for card in cards_played], key= lambda card: Card.two_low_numbers.index(card))[-1] )
+
                 elif is_in(sorted([card.number for card in cards_played], key= lambda card: Card.two_low_numbers.index(card)), Card.two_low_numbers) == True:
-                    return Hand(Hand.poker_hands[1])
-                elif
-        what_is_it(cards_played)
+                    return Hand(Hand.poker_hands[0], sorted([card.number for card in cards_played], key= lambda card: Card.two_low_numbers.index(card))[-1] )
+
+        return what_is_it(cards_played)
 
 
 
@@ -168,10 +172,10 @@ new_deck = Deck()
 
 # new_deck.shuffle()
 # new_deck.deal()
-card1 = Card('Hearts', 'Ace')
-card2 = Card('Spades', 'Ace')
-card3 = Card('Clubs', 'Queen')
-card4 = Card('Diamonds', 'Queen')
+card1 = Card('Hearts', 'Jack')
+card2 = Card('Spades', 9)
+card3 = Card('Clubs', 10)
+card4 = Card('Diamonds', 8)
 card5 = Card('Hearts', 'Queen')
 new_deck.cards = [card1, card2, card3, card4, card5]
 player1.hand = {1: card2, 2: card5, 3: card1, 4: card3, 5: card4}
