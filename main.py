@@ -74,11 +74,12 @@ class Deck:
 
 
 class Hand:
-    poker_hands = ['Straight', 'Flush', 'Full House', 'Four-of-a-kind', 'Straight Flush']
+    poker_hands = ['Single', 'Pair', 'Three-of-a-kind', 'Straight', 'Flush', 'Full House', 'Four-of-a-kind', 'Straight-Flush']
 
     def __init__(self, hand, high_card):
         self.hand = hand
         self.high_card = high_card
+
         # high number is a card object
 
     def __lt__(self, other):
@@ -92,8 +93,16 @@ class Hand:
                 return True
 
     def __repr__(self):
-        description = str(self.hand) + ', ' + str(self.high_card) + ' high'
-        return description
+        if self.hand in Hand.poker_hands[2:-1]:
+            poker_hand_description = str(self.hand) + ', ' + str(self.high_card) + ' high'
+            return poker_hand_description
+
+        elif self.hand == Hand.poker_hands[1]:
+            pair_description = 'Pair of ' + str(self.high_card.number) + 's, ' + str(self.high_card) + ' high'
+            return pair_description
+
+        elif self.hand == Hand.poker_hands[0]:
+            return self.high_card
 
 
 class Player:
@@ -118,7 +127,7 @@ class Player:
                     return True
 
         def what_is_it(cards):
-            print((cards))
+            print((cards_played))
             if len(cards) == 5:
                 if is_in(sorted([card.number for card in cards_played], key= lambda card: Card.two_low_numbers.index(card)), Card.two_low_numbers) == True and sum(1 for card in cards_played if card.suit == cards_played[0].suit) == 5:
                     return Hand(Hand.poker_hands[4], sorted(cards_played)[-1])
@@ -136,12 +145,17 @@ class Player:
                 elif is_in(sorted([card.number for card in cards_played], key= lambda card: Card.two_low_numbers.index(card)), Card.two_low_numbers) == True:
                     return Hand(Hand.poker_hands[0], sorted(cards_played)[-1])
             elif len(cards) == 3:
-                    if card_numbers.count(card.number) == 3:
-                        return Hand('Three-of-a-kind', card.number)
+                if sum(1 for card in cards_played if card.number == cards_played[0].number) == 3:
+                    return Hand('Three-of-a-kind', cards_played[0].number)
             elif len(cards) == 2:
-                return Hand('Pair of ' + str(sorted(cards_played)[-1].number) + 's', sorted(cards_played)[-1])
+                if cards_played[0].number == cards_played[1].number:
+                    return Hand(Hand.poker_hands[1], sorted(cards_played)[-1])
+                else:
+                    return 'The only permissible hand containing two cards is a pair'
+            elif len(cards) == 1:
+                return Hand(Hand.poker_hands[0], cards_played[0])
 
-        return what_is_it(cards_played)
+        return what_is_it(cards)
 
 
 
@@ -168,15 +182,18 @@ welcome = '''
 print(welcome)
 print('Welcome to Chinese Poker!')
 player1 = Player('Jacob')
-player2 = Player('Emily')
-player3 = Player('cory')
-player4 = Player('Dad')
+# player2 = Player(input('Player 2, enter your name:'))
+# player3 = Player(input('Player 3, enter your name:'))
+# player4 = Player(input('Player 4, enter your name:'))
 
-players = [player1, player2, player3, player4]
+# players = [player1, player2, player3, player4]
+
 new_deck = Deck()
 
 # new_deck.shuffle()
 # new_deck.deal()
+turns = []
+
 card1 = Card('Hearts', 'Jack')
 card2 = Card('Spades', 'Jack')
 card3 = Card('Clubs', 'Jack')
@@ -185,6 +202,9 @@ card5 = Card('Hearts', 8)
 new_deck.cards = [card1, card2, card3, card4, card5]
 player1.hand = {1: card2, 2: card5, 3: card1, 4: card3, 5: card4}
 
-print(player1.play(([ 5, 4])))
-
-
+player1.play(([1, 3]))
+print(turns)
+# while len(player1.hand) != 0 and len(player2.hand) != 0 and len(player3.hand) != 0 and len(player4.hand) != 0:
+#     pass
+# print(self.name + ' plays a ' + str(
+#     Hand('Pair of ' + str(sorted(cards_played)[-1].number) + 's', sorted(cards_played)[-1])))
