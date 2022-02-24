@@ -112,7 +112,7 @@ class Hand:
             return pair_description
 
         elif self.hand == Hand.poker_hands[1]:
-            return str(self.high_card)
+            return Hand.poker_hands[1] + ' ' + str(self.high_card)
 
         if self.hand == Hand.poker_hands[0]:
             return 'pass'
@@ -148,7 +148,6 @@ class Player:
 
         def what_is_it(cards):
             if len(cards) == 5:
-                print(cards)
                 if is_in(sorted([card.number for card in cards_played], key= lambda card: Card.two_low_numbers.index(card)), Card.two_low_numbers) == True and sum(1 for card in cards_played if card.suit == cards_played[0].suit) == 5:
                     return Hand(Hand.poker_hands[7], sorted([card for card in cards_played], key= lambda card: Card.two_low_numbers.index(card.number))[-1], self, cards_played)
 
@@ -166,16 +165,22 @@ class Player:
                     return Hand(Hand.poker_hands[4], sorted([card for card in cards_played], key= lambda card: Card.two_low_numbers.index(card.number))[-1], self, cards_played)
                 else:
                     return 'Not a valid poker hand'
+
+            elif len(cards) == 4:
+                print('There is no valid hand containing four cards. If you are attemptng to play a four-of-a-kind, please include an extra card.')
+
             elif len(cards) == 3:
                 if sum(1 for card in cards_played if card.number == cards_played[0].number) == 3:
                     return Hand(Hand.poker_hands[3], cards_played[0].number, self, cards_played)
                 else:
                     return 'The only permissible hand containing three cards is a Three-of-a-kind'
+
             elif len(cards) == 2:
                 if cards_played[0].number == cards_played[1].number:
                     return Hand(Hand.poker_hands[2], sorted(cards_played)[-1], self, cards_played)
                 else:
                     return 'The only permissible hand containing two cards is a pair'
+
             elif len(cards) == 1:
                 if type(cards[0]) == int:
                     return Hand(Hand.poker_hands[1], cards_played[0], self, cards_played)
@@ -192,6 +197,26 @@ def pop_reset(turn_ints):
 
 def list_ints(turn_input):
     return [int(entry) for entry in turn_input]
+
+def keep_score(players):
+
+    for player in players:
+        if len(player.hand) == 0:
+            for i in players:
+                if len(i.hand) <= 7 and len(i.hand) != 0:
+                    player.score += len(i.hand)
+                elif len(i.hand) > 7 and len(i.hand) < 13:
+                    player.score += 2 * len(i.hand)
+                elif len(i.hand) == 13:
+                    player.score += 3 * len(i.hand)
+        elif len(player.hand) <= 7:
+            player.score -= len(player.hand)
+        elif len(player.hand) > 7 and len(player.hand) < 13:
+            player.score -= 2 * len(player.hand)
+        elif len(player.hand) == 13:
+            player.score -= 3 * len(player.hand)
+    score_board = {player1: player1.score, player2: player2.score, player3: player3.score, player4: player4.score}
+    return score_board
 
 
 
@@ -224,24 +249,21 @@ for i in range(len(players) - 1, 0, -1):
     r = random.randint(0, i)
     players[i], players[r] = players[r], players[i]
 
-testcard1 = Card('Diamonds', 4)
-testcard2 = Card('Spades', 'Ace')
-print(testcard2 > testcard1)
-new_deck = Deck()
 
-new_deck.shuffle()
-new_deck.deal()
-turns = []
 round_count = 1
 if round_count == 11:
     print('{player} wins!')
-print(len(turns))
-score_board = {player1: player1.score, player2: player2.score, player3: player3.score, player4: player4.score}
+
+
 while round_count < 11:
-    print(score_board)
-    print('\n')
+    turns = []
+    new_deck = Deck()
+    new_deck.shuffle()
+    new_deck.deal()
+
     while len(player1.hand) != 0 and len(player2.hand) != 0 and len(player3.hand) != 0 and len(player4.hand) != 0:
         round_notification = 'Round {round_number}'.format(round_number= round_count)
+
 
         while len(turns) == 0:
             for i in players:
@@ -255,12 +277,17 @@ while round_count < 11:
                             try:
                                 first_turn = input('').split(',')
                                 first_turn_ints = [int(entry) for entry in first_turn]
-                                print("You are trying to play a {hand}. type y/n to confirm: ".format(
+                                if type(i.play(first_turn_ints)) == str:
+                                    print('Please play a valid hand containing the 3-of-Diamonds')
+                                    continue
+                                else:
+                                    print("You are trying to play a {hand}. type y/n to confirm: ".format(
                                     hand=i.play(first_turn_ints)))
                                 y_n_counter = 0
                                 while y_n_counter == 0:
                                     verification = input('')
                                     if verification == 'y':
+                                        three_of_diamonds_counter = 0
                                         for c in i.play(first_turn_ints).list_of_cards:
                                             if c.suit == 'Diamonds' and c.number == 3:
                                                 turns.append(i.play(first_turn_ints))
@@ -269,11 +296,12 @@ while round_count < 11:
                                                 i.hand = dict(zip((range(1, len(i.hand) + 1)), (i.hand.values())))
                                                 first_counter += 1
                                                 y_n_counter += 1
+                                                three_of_diamonds_counter += 1
                                                 continue
-                                            else:
-                                                print('The hand you are attempting to play must contain the 3-of-Diamonds.')
-                                                y_n_counter += 1
-                                                continue
+                                        if three_of_diamonds_counter == 0:
+                                            print('The hand you are attempting to play must contain the 3-of-Diamonds.')
+                                            y_n_counter += 1
+                                            continue
 
                                     elif verification == 'n':
                                         print(i.name + ", you have the 3-of-Diamonds. Please go first and include the 3-of-Diamonds in your opening hand.\nType the numbers of the cards you wish to play below:\nType h to view you hand\n")
@@ -309,11 +337,19 @@ while round_count < 11:
                                     print('Not a valid selection. Please play a valid hand containing the 3-of-Diamonds')
                             except AttributeError:
                                 print('Not a valid selection. Please play a valid hand containing the 3-of-Diamonds')
+                            except KeyError:
+                                print('Invalid selction. Please play a valid hand')
     ### End of first turn block
 
         for player in players:
+            if len(turns[-1].player.hand) == 0:
+                break
             while turns[-1].player == players[players.index(player) - 1]:
+                counter = 0
                 # Checks to see if the player before has passed and displays the hand
+                for has_one in players:
+                    if len(has_one.hand) == 1:
+                        print('{player} has one card left'.format(player= has_one))
 
                 if sum(1 for hand in turns[-3:] if hand.hand == 'pass') == 3:
                     print('{player}, it is your lead. You may play any valid hand.\nPress h to view your hand'.format(player= player))
@@ -331,9 +367,13 @@ while round_count < 11:
                                     lead_counter += 1
                                     turns.append(player.play(turn_ints))
                                     pop_reset(turn_ints)
+                                    counter += 1
+                                    continue
                                 elif verify == 'n':
                                     verify_counter += 1
                                     continue
+                                else:
+                                    print("Type y/n to confirm")
 
                         except ValueError:
                             if turn_input == ['h']:
@@ -345,14 +385,15 @@ while round_count < 11:
 
                             else:
                                 print('Not a valid hand. Please try again.')
+                                continue
                         except AttributeError:
                             print(player.play(turn_ints))
                         except KeyError:
-                            print('Not a valid hand. Please try again.')
+                            print('Invalid selction. Please play a valid hand')
                         continue
 
                 elif sum(1 for hand in turns[-2:] if hand.hand == 'pass') == 2:
-                    print('!!{player}, {prev_player} passed. Please play a higher hand than {not_pass_player}\'s {not_pass_turn}\nTo view your hand, press h\nTo pass, type pass\n'.format(player= player, prev_player= turns[-3].player, not_pass_player= turns[-3].player, not_pass_turn= turns[-3]))
+                    print('!!{player}, {prev_player} passed. Please play a higher hand than {not_pass_player}\'s {not_pass_turn}\nTo view your hand, press h\nTo pass, type pass\n'.format(player= player, prev_player= turns[-1].player, not_pass_player= turns[-3].player, not_pass_turn= turns[-3]))
 
                 elif str(turns[-1]) == 'pass':
                     print('!{player}, {prev_player} passed. Please play a higher hand than {prev_turn}\'s {prev_hand}\nTo view your hand, press h\nTo pass, type pass\n'.format(player=player,prev_player=turns[-1].player,prev_turn=turns[-2].player, prev_hand= turns[-2]))
@@ -363,9 +404,9 @@ while round_count < 11:
                 else:
                     print(str(turns[-1].player) + ' played a ' + str(turns[-1]) + '\n\n')
                     print('{player_name} it is your turn.\nPlease play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n'.format(player_name=player.name, previous_player=turns[-1].player, previous_turn= turns[-1]))
-                counter = 0
+
                 while counter == 0:
-                    if turns[-1] == 'pass' and turns[-2] == 'pass':
+                    if turns[-1].hand == 'pass' and turns[-2].hand == 'pass':
                         try:
                             turn_input = input('').split(',')
                             turn_ints = [int(entry) for entry in turn_input]
@@ -376,57 +417,61 @@ while round_count < 11:
                                 verify = input('')
                                 if verify == 'y':
                                     verify_counter +=1
-                                    if player.play(turn_ints).hand == 'Single':
-                                        if player.play(turn_ints) > turns[-3]:
-                                            turns.append(player.play(turn_ints))
-                                            pop_reset(turn_ints)
-                                            counter += 1
-                                        elif player.play(turn_ints) < turns[-3]:
-                                            print(str(player.play(turn_ints)) + ' is not higher than ' + str(turns[-3]))
-                                        # except ValueError:
-                                        #     print(
-                                        #         'Not a valid hand. Please play a hand higher than {prev_turn}'.format(
-                                        #             prev_turn=turns[-3]))
+                                    if len(player.play(turn_ints).list_of_cards) == len(turns[-3].list_of_cards):
+                                        print('hi')
+                                        if type(player.play(turn_ints)) == str:
+                                            print(player.play(turn_ints))
+                                            continue
+                                        elif player.play(turn_ints).hand == 'Single':
+                                            if player.play(turn_ints) > turns[-3]:
+                                                turns.append(player.play(turn_ints))
+                                                pop_reset(turn_ints)
+                                                counter += 1
+                                            elif player.play(turn_ints) < turns[-3]:
+                                                print(str(player.play(turn_ints)) + ' is not higher than ' + str(turns[-3]))
+                                            # except ValueError:
+                                            #     print(
+                                            #         'Not a valid hand. Please play a hand higher than {prev_turn}'.format(
+                                            #             prev_turn=turns[-3]))
 
-                                    elif player.play(turn_ints).hand == 'Pair':
-                                        print('I know this is a pair')
-                                        if player.play(turn_ints).hand == Hand.poker_hands[2] and player.play(turn_ints) > turns[-3]:
-                                            turns.append(player.play(turn_ints))
-                                            pop_reset(turn_ints)
-                                            counter += 1
-                                        else:
-                                            print(str(turns[-3].player) + ' played a ' + str(
-                                                turns[-3]) + '. Please play a higher pair.')
+                                        elif player.play(turn_ints).hand == 'Pair':
+                                            if player.play(turn_ints).hand == Hand.poker_hands[2] and player.play(turn_ints) > turns[-3]:
+                                                turns.append(player.play(turn_ints))
+                                                pop_reset(turn_ints)
+                                                counter += 1
+                                            else:
+                                                print(str(turns[-3].player) + ' played a ' + str(
+                                                    turns[-3]) + '. Please play a higher pair.')
 
-                                    elif player.play(turn_ints).hand == 'Three-of-a-kind':
-                                        if player.play(turn_ints) == Hand.poker_hands[3] and player.play(turn_ints) > turns[-3]:
-                                            turns.append(player.play(turn_ints))
-                                            pop_reset(turn_ints)
-                                            counter += 1
-                                        else:
-                                            print(str(turns[-3].player) + ' played a ' + str(
-                                                turns[-1]) + '. Please play a higher Three-of-a-kind.')
+                                        elif player.play(turn_ints).hand == 'Three-of-a-kind':
+                                            if player.play(turn_ints) == Hand.poker_hands[3] and player.play(turn_ints) > turns[-3]:
+                                                turns.append(player.play(turn_ints))
+                                                pop_reset(turn_ints)
+                                                counter += 1
+                                            else:
+                                                print(str(turns[-3].player) + ' played a ' + str(
+                                                    turns[-3]) + '. Please play a higher Three-of-a-kind.')
 
-                                    elif len(turn_ints) == 4:
-                                        print(
-                                            'Error: 4 cards is not a valid entry. If you are trying to play a Four-of-a-kind, please include any fifth card')
+                                        elif len(turn_ints) == 4:
+                                            print(
+                                                'Error: 4 cards is not a valid entry. If you are trying to play a Four-of-a-kind, please include any fifth card')
 
-                                    elif len(turn_ints) == 5:
-                                        if player.play(turn_ints) != 'Not a valid poker hand' and player.play(turn_ints) > turns[-3]:
-                                            turns.append(player.play(turn_ints))
-                                            pop_reset(turn_ints)
-                                            counter += 1
-                                        elif player.play(turn_ints) <= turns[-3]:
-                                            print((turns[-3].player + ' played a ' + turns[-3] + '. Please play a higher poker hand.'))
+                                        elif len(turn_ints) == 5:
+                                            if player.play(turn_ints) != 'Not a valid poker hand' and turns[-3].hand in Hand.poker_hands[4:]:
+                                                if player.play(turn_ints) > turns[-3]:
+                                                    turns.append(player.play(turn_ints))
+                                                    pop_reset(turn_ints)
+                                                    counter += 1
+                                                elif player.play(turn_ints) < turns[-3]:
+                                                    print('{player_passed} passed. Please play a higher poker hand than {last_hand_player}\'s {last_valid hand}'.format(player_passed= str(turns[-1].player), last_hand_player=str(turns[-3].hand)))
+                                    else:
+                                        print(str(turns[-3].player) + ' played a ' + str(turns[-3]) + '. Your hand must contain the same number of cards.')
                                 elif verify == 'n':
                                     print('Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n'.format(player_name=player.name, previous_player=turns[-1].player, previous_turn= turns[-1]))
                                     verify_counter += 1
                                 else:
                                     print('Press y/n to confirm')
                                     continue
-
-                            if player.play(turn_ints) == 'Not a permissible play. Please Try again':
-                                print(player.play(turn_ints))
 
                         except ValueError:
                             if turn_input == ['h']:
@@ -444,15 +489,20 @@ while round_count < 11:
                                         pass_verify_count += 1
                                     elif pass_verify == 'n':
                                         print(
-                                            'Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n'.format(player_name=player.name, previous_player=turns[-1].player, previous_turn=turns[-1]))
+                                            'Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n'.format(player_name=player.name, previous_player=str(turns[-1].player), previous_turn=str(turns[-1])))
                                         pass_verify_count += 1
                                         continue
                                     else:
-                                        ('Press y/n to confirm')
+                                        print('Press y/n to confirm')
+                            else:
+                                print('Invalid selection. Please play a valid hand.')
                         except AttributeError:
                             print(player.play(turn_ints))
+                        except KeyError:
+                            print('Invalid selection. Please play a valid hand')
 
                     elif turns[-1].hand == 'pass':
+                        # print('yoyo')
                         try:
                             turn_input = input('').split(',')
                             turn_ints = [int(entry) for entry in turn_input]
@@ -462,59 +512,61 @@ while round_count < 11:
                                 verify = input('')
                                 if verify == 'y':
                                     verify_counter += 1
-                                    if player.play(turn_ints).hand == 'Single':
-                                        if player.play(turn_ints) > turns[-2]:
-                                            turns.append(player.play(turn_ints))
-                                            pop_reset(turn_ints)
-                                            counter += 1
-                                        elif player.play(turn_ints) < turns[-2]:
-                                            print(str(player.play(turn_ints)) + ' is not higher than ' + str(turns[-2]))
+                                    if len(player.play(turn_ints).list_of_cards) == len(turns[-2].list_of_cards):
+                                        if type(player.play(turn_ints)) == str:
+                                            print(player.play(turn_ints))
+                                            continue
 
-                                    elif player.play(turn_ints).hand == 'Pair':
-                                        print('I know this is a pair')
-                                        if player.play(turn_ints).hand == Hand.poker_hands[2] and player.play(turn_ints) > turns[-2]:
-                                            turns.append(player.play(turn_ints))
-                                            pop_reset(turn_ints)
-                                            counter += 1
-                                        else:
-                                            print(str(turns[-2].player) + ' played a ' + str(
-                                                turns[-2]) + '. Please play a higher pair.')
+                                        elif player.play(turn_ints).hand == 'Single':
+                                            if player.play(turn_ints) > turns[-2]:
+                                                turns.append(player.play(turn_ints))
+                                                pop_reset(turn_ints)
+                                                counter += 1
+                                            elif player.play(turn_ints) < turns[-2]:
+                                                print(str(player.play(turn_ints)) + ' is not higher than ' + str(turns[-2]))
 
-                                    elif player.play(turn_ints).hand == 'Three-of-a-kind':
-                                        if player.play(turn_ints) == Hand.poker_hands[3] and player.play(turn_ints) > turns[-2]:
-                                            turns.append(player.play(turn_ints))
-                                            pop_reset(turn_ints)
-                                            counter += 1
-                                        else:
-                                            print(str(turns[-2].player) + ' played a ' + str(
-                                                turns[-2]) + '. Please play a higher Three-of-a-kind.')
+                                        elif player.play(turn_ints).hand == 'Pair':
+                                            if player.play(turn_ints).hand == Hand.poker_hands[2] and player.play(turn_ints) > turns[-2]:
+                                                turns.append(player.play(turn_ints))
+                                                pop_reset(turn_ints)
+                                                counter += 1
+                                            else:
+                                                print(str(turns[-2].player) + 'passed played a ' + str(
+                                                    turns[-2]) + '. Please play a higher pair.')
 
-                                    elif len(turn_ints) == 4:
-                                        print(
-                                            'Error: 4 cards is not a valid entry. If you are trying to play a Four-of-a-kind, please include any fifth card')
+                                        elif player.play(turn_ints).hand == 'Three-of-a-kind':
+                                            if player.play(turn_ints) == Hand.poker_hands[3] and player.play(turn_ints) > turns[-2]:
+                                                turns.append(player.play(turn_ints))
+                                                pop_reset(turn_ints)
+                                                counter += 1
+                                            else:
+                                                print(str(turns[-2].player) + ' played a ' + str(
+                                                    turns[-2]) + '. Please play a higher Three-of-a-kind.')
 
-                                    elif len(turn_ints) == 5:
-                                        if player.play(turn_ints) != 'Not a valid poker hand' and player.play(turn_ints) > turns[-2]:
-                                            turns.append(player.play(turn_ints))
-                                            pop_reset(turn_ints)
-                                            counter += 1
-                                        elif player.play(turn_ints) <= turns[-2]:
-                                            print((turns[-2].player + ' played a ' + turns[
-                                                -2] + '. Please play a higher poker hand.'))
+                                        elif len(turn_ints) == 4:
+                                            print(
+                                                'Error: 4 cards is not a valid entry. If you are trying to play a Four-of-a-kind, please include any fifth card')
+
+                                        elif len(turn_ints) == 5:
+                                            if player.play(turn_ints) != 'Not a valid poker hand' and player.play(turn_ints) > turns[-2]:
+                                                turns.append(player.play(turn_ints))
+                                                pop_reset(turn_ints)
+                                                counter += 1
+                                            elif player.play(turn_ints) <= turns[-2]:
+                                                print(str(turns[-2].player) + ' played a ' + str(turns[
+                                                    -2]) + '. Please play a higher poker hand.')
+                                    else:
+                                        print(str(turns[-2].player) + ' played a ' + str(turns[-2]) + '. Your hand must contain the same number of cards.')
                                 elif verify == 'n':
-                                    print('Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n'.format(player_name=player.name, previous_player=turns[-1].player, previous_turn= turns[-1]))
+                                    print('Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n').format(player_name=player.name, previous_player=str(turns[-1].player), previous_turn=str(turns[-1]))
                                     verify_counter += 1
                                 else:
                                     print('Press y/n to confirm')
-
-                            if player.play(turn_ints) == 'Not a permissible play. Please Try again':
-                                print(player.play(turn_ints))
 
                         except ValueError:
                             if turn_input == ['h']:
                                 print(player.hand)
                                 continue
-
 
                             elif turn_input == ['pass']:
                                 print('Are you sure you want to pass? y/n')
@@ -528,15 +580,19 @@ while round_count < 11:
                                     elif pass_verify == 'n':
                                         print(
                                             'Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n'.format(
-                                                player_name=player.name, previous_player=turns[-1].player,
+                                                player_name=player.name, previous_player=str(turns[-1].player),
                                                 previous_turn=turns[-1]))
                                         pass_verify_count += 1
                                         continue
                                     else:
-                                        ('Press y/n to confirm')
+                                        print('Press y/n to confirm')
+                            else:
+                                print('Invalid selection. Please play a valid hand.')
 
                         except AttributeError:
                             print(player.play(turn_ints))
+                        except KeyError:
+                            print('Invalid selection. Please play a valid hand')
                     else:
                         try:
                             turn_input= input('').split(',')
@@ -548,50 +604,54 @@ while round_count < 11:
                                 verify = input('')
                                 if verify == 'y':
                                     verify_counter += 1
-                                    if player.play(turn_ints).hand == 'Single':
-                                        if player.play(turn_ints) > turns[-1]:
-                                            turns.append(player.play(turn_ints))
-                                            pop_reset(turn_ints)
-                                            counter += 1
-                                        elif player.play(turn_ints) < turns[-1]:
-                                            print(str(player.play(turn_ints)) + ' is not higher than ' + str(turns[-1]))
+                                    if len(player.play(turn_ints).list_of_cards) == len(turns[-1].list_of_cards):
+                                        if player.play(turn_ints) == str:
+                                            print(player.play(turn_ints))
+                                            continue
 
-                                    elif player.play(turn_ints).hand == 'Pair':
-                                        print('I know this is a pair')
-                                        if player.play(turn_ints).hand == Hand.poker_hands[2] and player.play(turn_ints) > turns[-1]:
-                                            turns.append(player.play(turn_ints))
-                                            pop_reset(turn_ints)
-                                            counter += 1
-                                        else:
-                                            print(str(turns[-1].player) + ' played a ' + str(turns[-1]) + '. Please play a higher pair.')
+                                        elif player.play(turn_ints).hand == 'Single':
+                                            if player.play(turn_ints) > turns[-1]:
+                                                turns.append(player.play(turn_ints))
+                                                pop_reset(turn_ints)
+                                                counter += 1
+                                            elif player.play(turn_ints) < turns[-1]:
+                                                print(str(player.play(turn_ints)) + ' is not higher than ' + str(turns[-1]))
 
-                                    elif player.play(turn_ints).hand == 'Three-of-a-kind':
-                                        if player.play(turn_ints) == Hand.poker_hands[3] and player.play(turn_ints) > turns[-1]:
-                                            turns.append(player.play(turn_ints))
-                                            pop_reset(turn_ints)
-                                            counter +=1
-                                        else:
-                                            print(str(turns[-1].player) + ' played a ' + str(turns[-1]) + '. Please play a higher Three-of-a-kind.')
+                                        elif player.play(turn_ints).hand == 'Pair':
+                                            print('I know this is a pair')
+                                            if player.play(turn_ints).hand == Hand.poker_hands[2] and player.play(turn_ints) > turns[-1]:
+                                                turns.append(player.play(turn_ints))
+                                                pop_reset(turn_ints)
+                                                counter += 1
+                                            else:
+                                                print(str(turns[-1].player) + ' played a ' + str(turns[-1]) + '. Please play a higher pair.')
 
-                                    elif len(turn_ints) == 4:
-                                        print('Error: 4 cards is not a valid entry. If you are trying to play a Four-of-a-kind, please include any fifth card')
+                                        elif player.play(turn_ints).hand == 'Three-of-a-kind':
+                                            if player.play(turn_ints) == Hand.poker_hands[3] and player.play(turn_ints) > turns[-1]:
+                                                turns.append(player.play(turn_ints))
+                                                pop_reset(turn_ints)
+                                                counter +=1
+                                            else:
+                                                print(str(turns[-1].player) + ' played a ' + str(turns[-1]) + '. Please play a higher Three-of-a-kind.')
 
-                                    elif len(turn_ints) == 5:
-                                        if player.play(turn_ints) != 'Not a valid poker hand' and player.play(turn_ints) > turns[-1]:
-                                            turns.append(player.play(turn_ints))
-                                            pop_reset(turn_ints)
-                                            counter += 1
-                                        elif player.play(turn_ints) <= turns[-1]:
-                                            print((turns[-1].player + ' played a ' + turns[-1] + '. Please play a higher poker hand.'))
+                                        elif len(turn_ints) == 4:
+                                            print('Error: 4 cards is not a valid entry. If you are trying to play a Four-of-a-kind, please include any fifth card')
+
+                                        elif len(turn_ints) == 5:
+                                            if player.play(turn_ints) != 'Not a valid poker hand' and player.play(turn_ints) > turns[-1]:
+                                                turns.append(player.play(turn_ints))
+                                                pop_reset(turn_ints)
+                                                counter += 1
+                                            elif player.play(turn_ints) < turns[-1]:
+                                                print(str(turns[-1].player) + ' played a ' + str(turns[-1]) + '. Please play a higher poker hand.')
+                                    else:
+                                        print(str(turns[-1].player) + ' played a ' + str(turns[-1]) + '. Your hand must contain the same number of cards.')
                                 elif verify == 'n':
-                                    print('Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n'.format(player_name=player.name, previous_player=turns[-1].player, previous_turn= turns[-1]))
+                                    print('Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n'.format(player_name=player.name, previous_player=str(turns[-1].player), previous_turn= str(turns[-1])))
                                     verify_counter += 1
                                 else:
                                     print('Press y/n to confirm')
                                     continue
-
-                            if player.play(turn_ints) == 'Not a permissible play. Please Try again':
-                                print(player.play(turn_ints))
 
                         except ValueError:
                             if turn_input == ['h']:
@@ -608,32 +668,24 @@ while round_count < 11:
                                         counter += 1
                                         pass_verify_count += 1
                                     elif pass_verify == 'n':
-                                        print('Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n'.format(player_name=player.name, previous_player=turns[-1].player, previous_turn= turns[-1]))
+                                        print('Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n'.format(player_name=player.name, previous_player=str(turns[-1].player), previous_turn= str(turns[-1])))
                                         pass_verify_count += 1
                                         continue
                                     else:
-                                        ('Press y/n to confirm')
+                                        print('Press y/n to confirm')
                             else:
                                 print('Not a valid hand. Please play a valid hand below')
                         except AttributeError:
                             print(player.play(turn_ints))
+                        except KeyError:
+                            print('Invalid selection. Please play a valid hand')
 
-    for player in players:
-        if len(player.hand) <= 7:
-            player.score -= len(player.hand)
-        elif len(player.hand) > 7 and len(player.hand) <= 13:
-            player.score -= 2 * len(player.hand)
-        elif len(player.hand) == 13:
-            player.score += 3 * len(player.hand)
+    print(keep_score(players))
+    for player in player:
         if len(player.hand) == 0:
-            for i in players:
-                if len(i.hand) <= 7:
-                    player.score += len(i.hand)
-                elif len(i.hand) > 7 and len(i.hand) <= 13:
-                    player.score -= 2 * len(i.hand)
-                elif len(i.hand) == 13:
-                    player.score += 3 * len(i.hand)
             print('{player} won round {round}'.format(player=player, round=round_count))
+    round_count += 1
+
 print('Final Score')
 print(score_board)
 print(score_board.keys()[score_board.values().index(max(score_board.values()))] + ' Wins!!!')
