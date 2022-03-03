@@ -94,12 +94,20 @@ class Hand:
                 return True
 
     def __gt__(self, other):
-        if self.hand == Hand.poker_hands[5] or self.hand == Hand.poker_hands[-1]:
-            if self.high_card.suit_rank > other.high_card.suit_rank:
-                return True
-        elif Hand.poker_hands.index(self.hand) > Hand.poker_hands.index(other.hand) or Hand.poker_hands.index(self.hand) == Hand.poker_hands.index(other.hand):
-            if self.high_card > other.high_card:
-                return True
+        if Hand.poker_hands.index(self.hand) > Hand.poker_hands.index(other.hand):
+            return True
+
+        elif Hand.poker_hands.index(self.hand) == Hand.poker_hands.index(other.hand):
+            if self.hand == Hand.poker_hands[5] or self.hand == Hand.poker_hands[-1]:
+                if self.high_card.suit_rank > other.high_card.suit_rank:
+                    return True
+                elif self.high_card.suit_rank == other.high_card.suit_rank:
+                    return Card.two_low_numbers.index(self.high_card.number) > Card.two_low_numbers.index(other.high_card.number)
+            elif self.hand == Hand.poker_hands[6] or self.hand == Hand.poker_hands[7]:
+                return Card.two_low_numbers.index(self.high_card.number) > Card.two_low_numbers.index(other.high_card.number)
+            else:
+                return self.high_card > other.high_card
+
 
 
     def __repr__(self):
@@ -271,7 +279,7 @@ while round_count < 11:
                     # print(player.hand)
                     if card.suit == 'Diamonds' and card.number == 3:
                         first_counter = 0
-                        print(i.name + ", you have the 3-of-Diamonds. Please go first and include the 3-of-Diamonds in your opening hand.\nType the numbers of the cards you wish to play below:\nType h to view you hand")
+                        print(i.name + ", you have the 3-of-Diamonds. Please go first and include the 3-of-Diamonds in your opening hand.\nType the numbers of the cards you wish to play below:\nType h to view your hand")
                         # print(first_turn)
                         while first_counter == 0:
                             try:
@@ -347,19 +355,24 @@ while round_count < 11:
             while turns[-1].player == players[players.index(player) - 1]:
                 counter = 0
                 # Checks to see if the player before has passed and displays the hand
-                for has_one in players:
-                    if len(has_one.hand) == 1:
-                        print('{player} has one card left'.format(player= has_one))
+
 
                 if sum(1 for hand in turns[-3:] if hand.hand == 'pass') == 3:
                     print('{player}, it is your lead. You may play any valid hand.\nPress h to view your hand'.format(player= player))
+                    for has_one in players:
+                        if len(has_one.hand) == 1:
+                            print('{player} has one card left'.format(player=has_one))
                     lead_counter = 0
                     while lead_counter == 0:
                         try:
                             turn_input = input('').split(',')
                             turn_ints = [int(entry) for entry in turn_input]
+                            if type(player.play(turn_ints)) == str:
+                                print(player.play(turn_ints))
+                                continue
                             print('You are trying to play a {hand}. Type y/n to confirm'.format(hand=player.play(turn_ints)))
                             verify_counter = 0
+
                             while verify_counter == 0:
                                 verify = input('')
                                 if verify == 'y':
@@ -394,22 +407,31 @@ while round_count < 11:
 
                 elif sum(1 for hand in turns[-2:] if hand.hand == 'pass') == 2:
                     print('!!{player}, {prev_player} passed. Please play a higher hand than {not_pass_player}\'s {not_pass_turn}\nTo view your hand, press h\nTo pass, type pass\n'.format(player= player, prev_player= turns[-1].player, not_pass_player= turns[-3].player, not_pass_turn= turns[-3]))
-
+                    for has_one in players:
+                        if len(has_one.hand) == 1:
+                            print('{player} has one card left'.format(player=has_one))
                 elif str(turns[-1]) == 'pass':
                     print('!{player}, {prev_player} passed. Please play a higher hand than {prev_turn}\'s {prev_hand}\nTo view your hand, press h\nTo pass, type pass\n'.format(player=player,prev_player=turns[-1].player,prev_turn=turns[-2].player, prev_hand= turns[-2]))
-
+                    for has_one in players:
+                        if len(has_one.hand) == 1:
+                            print('{player} has one card left'.format(player=has_one))
                 # Instructs the program to let the player who last played a hand to lead with any card
 
 
                 else:
                     print(str(turns[-1].player) + ' played a ' + str(turns[-1]) + '\n\n')
                     print('{player_name} it is your turn.\nPlease play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n'.format(player_name=player.name, previous_player=turns[-1].player, previous_turn= turns[-1]))
-
+                    for has_one in players:
+                        if len(has_one.hand) == 1:
+                            print('{player} has one card left'.format(player=has_one))
                 while counter == 0:
                     if turns[-1].hand == 'pass' and turns[-2].hand == 'pass':
                         try:
                             turn_input = input('').split(',')
                             turn_ints = [int(entry) for entry in turn_input]
+                            if type(player.play(turn_ints)) == str:
+                                print(player.play(turn_ints))
+                                continue
                             verify_counter = 0
                             while verify_counter == 0:
                                 print('You are trying to play a {hand}. Type y/n to confirm'.format(
@@ -506,6 +528,9 @@ while round_count < 11:
                         try:
                             turn_input = input('').split(',')
                             turn_ints = [int(entry) for entry in turn_input]
+                            if type(player.play(turn_ints)) == str:
+                                print(player.play(turn_ints))
+                                continue
                             print('You are trying to play a {hand}. Type y/n to confirm'.format(hand=player.play(turn_ints)))
                             verify_counter = 0
                             while verify_counter == 0:
@@ -548,11 +573,13 @@ while round_count < 11:
                                                 'Error: 4 cards is not a valid entry. If you are trying to play a Four-of-a-kind, please include any fifth card')
 
                                         elif len(turn_ints) == 5:
+                                            print(player.play(turn_ints) > turns[-2])
                                             if player.play(turn_ints) != 'Not a valid poker hand' and player.play(turn_ints) > turns[-2]:
+
                                                 turns.append(player.play(turn_ints))
                                                 pop_reset(turn_ints)
                                                 counter += 1
-                                            elif player.play(turn_ints) <= turns[-2]:
+                                            elif player.play(turn_ints) < turns[-2]:
                                                 print(str(turns[-2].player) + ' played a ' + str(turns[
                                                     -2]) + '. Please play a higher poker hand.')
                                     else:
@@ -597,6 +624,9 @@ while round_count < 11:
                         try:
                             turn_input= input('').split(',')
                             turn_ints = [int(entry) for entry in turn_input]
+                            if type(player.play(turn_ints)) == str:
+                                print(player.play(turn_ints))
+                                continue
                             print('You are trying to play a {hand}. Type y/n to confirm'.format(
                                 hand=player.play(turn_ints)))
                             verify_counter = 0
@@ -638,12 +668,15 @@ while round_count < 11:
                                             print('Error: 4 cards is not a valid entry. If you are trying to play a Four-of-a-kind, please include any fifth card')
 
                                         elif len(turn_ints) == 5:
+                                            print(player.play(turn_ints) > turns[-1])
                                             if player.play(turn_ints) != 'Not a valid poker hand' and player.play(turn_ints) > turns[-1]:
                                                 turns.append(player.play(turn_ints))
                                                 pop_reset(turn_ints)
                                                 counter += 1
                                             elif player.play(turn_ints) < turns[-1]:
                                                 print(str(turns[-1].player) + ' played a ' + str(turns[-1]) + '. Please play a higher poker hand.')
+                                            else:
+                                                print(player.play(turn_ints))
                                     else:
                                         print(str(turns[-1].player) + ' played a ' + str(turns[-1]) + '. Your hand must contain the same number of cards.')
                                 elif verify == 'n':
@@ -680,11 +713,15 @@ while round_count < 11:
                         except KeyError:
                             print('Invalid selection. Please play a valid hand')
 
-    print(keep_score(players))
-    for player in player:
+
+    for player in players:
         if len(player.hand) == 0:
             print('{player} won round {round}'.format(player=player, round=round_count))
     round_count += 1
+    print(keep_score(players))
+
+    for player in players:
+        player.hand = {}
 
 print('Final Score')
 print(score_board)
