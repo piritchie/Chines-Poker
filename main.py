@@ -227,7 +227,14 @@ def keep_score(players):
     return score_board
 
 
-
+cheat_sheet = '''
+Suit order ranked highest to lowest:     Poker Hands ranked highest to lowest:
+Spades                                   Straight-Flush (A run of five cards all the same suit)
+Hearts                                   Four-of-a-kind (Four of the same number with one random card)
+Clubs                                    Full House (Three of one number and two of another)
+Diamonds                                 Flush (Five cards of the same suit)
+                                         Straight (A run of five cards) 
+'''
 
 
 
@@ -246,10 +253,11 @@ welcome = '''
 print(type(welcome))
 print(welcome)
 print('Welcome to Chinese Poker!')
-player1 = Player('Jacob')
-player2 = Player('Cory')
-player3 = Player('Emily')
-player4 = Player('Dad')
+player1 = Player(input('Player 1, please enter your name: '))
+player2 = Player(input('Player 2, please enter your name: '))
+player3 = Player(input('Player 3, please enter your name: '))
+player4 = Player(input('Player 4, please enter your name: '))
+print('\n')
 
 players = [player1, player2, player3, player4]
 
@@ -259,9 +267,6 @@ for i in range(len(players) - 1, 0, -1):
 
 
 round_count = 1
-if round_count == 11:
-    print('{player} wins!')
-
 
 while round_count < 11:
     turns = []
@@ -279,7 +284,7 @@ while round_count < 11:
                     # print(player.hand)
                     if card.suit == 'Diamonds' and card.number == 3:
                         first_counter = 0
-                        print(i.name + ", you have the 3-of-Diamonds. Please go first and include the 3-of-Diamonds in your opening hand.\nType the numbers of the cards you wish to play below:\nType h to view your hand")
+                        print(i.name + ", you have the 3-of-Diamonds. Please go first and include the 3-of-Diamonds in your opening hand.\nType the numbers of the cards you wish to play separated by a comma below:\nType h to view your hand\nTo view the cheatsheet, type help\n")
                         # print(first_turn)
                         while first_counter == 0:
                             try:
@@ -312,7 +317,7 @@ while round_count < 11:
                                             continue
 
                                     elif verification == 'n':
-                                        print(i.name + ", you have the 3-of-Diamonds. Please go first and include the 3-of-Diamonds in your opening hand.\nType the numbers of the cards you wish to play below:\nType h to view you hand\n")
+                                        print(i.name + ", you have the 3-of-Diamonds. Please go first and include the 3-of-Diamonds in your opening hand.\nType the numbers of the cards you wish to play separated by a comma below:\nType h to view you hand\nTo vie the cheatsheet, type help\n")
                                         y_n_counter += 1
                                         continue
 
@@ -324,6 +329,9 @@ while round_count < 11:
                                 if first_turn == ['h']:
                                     print(i.hand)
                                     continue
+                                elif first_turn == ['help']:
+                                    print(cheat_sheet)
+                                    continue
                                 elif first_turn == ['pass']:
                                     print('Are you sure you want to pass? y/n')
                                     pass_verify_count = 0
@@ -334,7 +342,7 @@ while round_count < 11:
                                             pass_verify_count +=1
                                             continue
                                         elif pass_verify == 'n':
-                                            print(i.name + ", you have the 3-of-Diamonds. Please go first and include the 3-of-Diamonds in your opening hand.\nType the numbers of the cards you wish to play below:\nType h to view you hand")
+                                            print(i.name + ", you have the 3-of-Diamonds. Please go first and include the 3-of-Diamonds in your opening hand.\nType the numbers of the cards you wish to play separated by a comma below:\nType h to view you hand\nTo view the cheatsheet, type help")
                                             pass_verify_count += 1
                                             continue
                                         else:
@@ -358,7 +366,7 @@ while round_count < 11:
 
 
                 if sum(1 for hand in turns[-3:] if hand.hand == 'pass') == 3:
-                    print('{player}, it is your lead. You may play any valid hand.\nPress h to view your hand'.format(player= player))
+                    print('{player}, it is your lead. You may play any valid hand.\nPress h to view your hand\nTo view the cheatsheet, type help\n'.format(player= player))
                     for has_one in players:
                         if len(has_one.hand) == 1:
                             print('{player} has one card left'.format(player=has_one))
@@ -395,7 +403,9 @@ while round_count < 11:
                             elif turn_input == ['pass']:
                                 print('Don\'t be silly. You have the lead. Please play any valid hand.')
                                 continue
-
+                            elif turn_input == ['help']:
+                                print(cheat_sheet)
+                                continue
                             else:
                                 print('Not a valid hand. Please try again.')
                                 continue
@@ -406,12 +416,12 @@ while round_count < 11:
                         continue
 
                 elif sum(1 for hand in turns[-2:] if hand.hand == 'pass') == 2:
-                    print('!!{player}, {prev_player} passed. Please play a higher hand than {not_pass_player}\'s {not_pass_turn}\nTo view your hand, press h\nTo pass, type pass\n'.format(player= player, prev_player= turns[-1].player, not_pass_player= turns[-3].player, not_pass_turn= turns[-3]))
+                    print('{player}, {prev_player} passed. Please play a higher hand than {not_pass_player}\'s {not_pass_turn}\nTo view your hand, press h\n To view the cheatsheet, type help\nTo pass, type pass\n'.format(player= player, prev_player= turns[-1].player, not_pass_player= turns[-3].player, not_pass_turn= turns[-3]))
                     for has_one in players:
                         if len(has_one.hand) == 1:
                             print('{player} has one card left'.format(player=has_one))
                 elif str(turns[-1]) == 'pass':
-                    print('!{player}, {prev_player} passed. Please play a higher hand than {prev_turn}\'s {prev_hand}\nTo view your hand, press h\nTo pass, type pass\n'.format(player=player,prev_player=turns[-1].player,prev_turn=turns[-2].player, prev_hand= turns[-2]))
+                    print('{player}, {prev_player} passed. Please play a higher hand than {prev_turn}\'s {prev_hand}\nTo view your hand, press h\nTo view the cheatsheet, type help\nTo pass, type pass\n'.format(player=player,prev_player=turns[-1].player,prev_turn=turns[-2].player, prev_hand= turns[-2]))
                     for has_one in players:
                         if len(has_one.hand) == 1:
                             print('{player} has one card left'.format(player=has_one))
@@ -420,7 +430,7 @@ while round_count < 11:
 
                 else:
                     print(str(turns[-1].player) + ' played a ' + str(turns[-1]) + '\n\n')
-                    print('{player_name} it is your turn.\nPlease play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n'.format(player_name=player.name, previous_player=turns[-1].player, previous_turn= turns[-1]))
+                    print('{player_name} it is your turn.\nPlease play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\nTo view the cheatsheet, type help\n'.format(player_name=player.name, previous_player=turns[-1].player, previous_turn= turns[-1]))
                     for has_one in players:
                         if len(has_one.hand) == 1:
                             print('{player} has one card left'.format(player=has_one))
@@ -489,7 +499,7 @@ while round_count < 11:
                                     else:
                                         print(str(turns[-3].player) + ' played a ' + str(turns[-3]) + '. Your hand must contain the same number of cards.')
                                 elif verify == 'n':
-                                    print('Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n'.format(player_name=player.name, previous_player=turns[-1].player, previous_turn= turns[-1]))
+                                    print('Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\nTo vie the cheatsheet, type help\n'.format(player_name=player.name, previous_player=turns[-1].player, previous_turn= turns[-1]))
                                     verify_counter += 1
                                 else:
                                     print('Press y/n to confirm')
@@ -511,7 +521,7 @@ while round_count < 11:
                                         pass_verify_count += 1
                                     elif pass_verify == 'n':
                                         print(
-                                            'Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n'.format(player_name=player.name, previous_player=str(turns[-1].player), previous_turn=str(turns[-1])))
+                                            'Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\nTo vie the cheatsheet, type help\n'.format(player_name=player.name, previous_player=str(turns[-1].player), previous_turn=str(turns[-1])))
                                         pass_verify_count += 1
                                         continue
                                     else:
@@ -585,7 +595,7 @@ while round_count < 11:
                                     else:
                                         print(str(turns[-2].player) + ' played a ' + str(turns[-2]) + '. Your hand must contain the same number of cards.')
                                 elif verify == 'n':
-                                    print('Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n').format(player_name=player.name, previous_player=str(turns[-1].player), previous_turn=str(turns[-1]))
+                                    print('Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\nTo view the cheatsheet, type help\n').format(player_name=player.name, previous_player=str(turns[-1].player), previous_turn=str(turns[-1]))
                                     verify_counter += 1
                                 else:
                                     print('Press y/n to confirm')
@@ -593,6 +603,9 @@ while round_count < 11:
                         except ValueError:
                             if turn_input == ['h']:
                                 print(player.hand)
+                                continue
+                            elif turn_input == ['help']:
+                                print(cheat_sheet)
                                 continue
 
                             elif turn_input == ['pass']:
@@ -606,7 +619,7 @@ while round_count < 11:
                                         pass_verify_count += 1
                                     elif pass_verify == 'n':
                                         print(
-                                            'Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\n'.format(
+                                            'Please play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\nTo view the cheatsheet, type help'.format(
                                                 player_name=player.name, previous_player=str(turns[-1].player),
                                                 previous_turn=turns[-1]))
                                         pass_verify_count += 1
@@ -689,6 +702,9 @@ while round_count < 11:
                         except ValueError:
                             if turn_input == ['h']:
                                 print(player.hand)
+                                continue
+                            elif turn_input == ['help']:
+                                print(cheat_sheet)
                                 continue
 
                             elif turn_input == ['pass']:
