@@ -740,8 +740,8 @@ while round_count < 11:
         player.hand = {}
 
 print('Final Score')
-print(score_board)
-print(score_board.keys()[score_board.values().index(max(score_board.values()))] + ' Wins!!!')
+print(keep_score(players))
+print(keep_score(players).keys()[keep_score(players).values().index(max(keep_score(players).values()))] + ' Wins!!!')
 
 
 
