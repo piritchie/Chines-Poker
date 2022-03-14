@@ -268,6 +268,7 @@ for i in range(len(players) - 1, 0, -1):
 
 round_count = 1
 
+
 while round_count < 11:
     turns = []
     new_deck = Deck()
