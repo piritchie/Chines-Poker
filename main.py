@@ -428,7 +428,6 @@ while round_count < 11:
                             print('{player} has one card left'.format(player=has_one))
                 # Instructs the program to let the player who last played a hand to lead with any card
 
-
                 else:
                     print(str(turns[-1].player) + ' played a ' + str(turns[-1]) + '\n\n')
                     print('{player_name} it is your turn.\nPlease play a higher hand than {previous_player}\'s {previous_turn}\nTo pass, type pass\nTo play a hand, type the numbers that correspond to the cards you want play separated by a comma\nTo view your hand, type h\nTo view the cheatsheet, type help\n'.format(player_name=player.name, previous_player=turns[-1].player, previous_turn= turns[-1]))
